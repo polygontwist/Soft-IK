@@ -49,19 +49,20 @@ var ik=function(ziel_ID){
 	
 	
 	
-	var setWBXY=function(o){
+	var setWBXY=function(o){//Position und Größe setzen (CSS)
 		o.o.style.left=o.x+"px";
 		o.o.style.top=o.y+"px";
 		o.o.style.width=o.b+"px";
 		o.o.style.height=o.h+"px";		
 	}
-	var setXY=function(o,x,y){if(isNaN(x))return;
+	var setXY=function(o,x,y){//Position setzen (CSS)
+		if(isNaN(x))return;
 		o.o.style.left=x+"px";
 		o.o.style.top=y+"px";
 		o.x=x;
 		o.y=y;
 	}
-	var rotate=function(o,deg,mitLimit){
+	var rotate=function(o,deg,mitLimit){//Rotation unter berücksichtigung von Limits setzen
 		if(isNaN(deg))
 		{
 			//console.log(o,deg)
@@ -72,7 +73,7 @@ var ik=function(ziel_ID){
 			if(deg<o.limitrot.min)deg=o.limitrot.min;
 			if(deg>o.limitrot.max)deg=o.limitrot.max;
 		}
-		o.o.style.transform="rotate("+deg+"deg)";
+		o.o.style.transform="rotate("+deg+"deg)";	//CSS
 		o.r=deg;
 	}
 	
@@ -93,7 +94,7 @@ var ik=function(ziel_ID){
 		return re;
 	}
 	
-	
+	//SEtup der verschiedenen Arme
 	var arme=[
 		{
 			oarm:{o:0,x:150,y:150,b:20,h:150,r:0,limitrot:{max:80, min:-80}},
@@ -135,18 +136,18 @@ var ik=function(ziel_ID){
 		return re;
 	}
 	
-	var stretchTo=function(the_arm, mx,my){
+	var stretchTo=function(the_arm, mx,my){//Arm ausrichten
 		var w1=0,w2=0;
 		var p2xy,wp2,wpM,wp1;
 		
 		var p1x=the_arm.oarm.x+the_arm.oarm.b*0.5;//Drehpunk liegt +50% breite
 		var p1y=the_arm.oarm.y;
 		
-		var a=streckenlaenge2D([p1x,p1y],[mx,my]); //P1Maus
-		var b=the_arm.uarm.y;//weil verschachtelt  //P1P2
-		var c=the_arm.hand.y;					   //P2Maus
+		var a=streckenlaenge2D([p1x,p1y],[mx,my]); //P1Maus (Schulterpunkt)
+		var b=the_arm.uarm.y;//weil verschachtelt  //P1P2 (grüner Punkt)
+		var c=the_arm.hand.y;					   //P2Maus (Handpunkt)
 		
-		if(a>=(c+b)){//gestreckt
+		if(a>=(c+b)){//gestreckt, Punkte liegen zuweit auseinander
 			w1=getWinkel([p1x,p1y+20],[p1x,p1y], [mx,my],true);
 			rotate(the_arm.oarm,w1,false);
 			rotate(the_arm.uarm,w2,false);
@@ -154,10 +155,8 @@ var ik=function(ziel_ID){
 			
 			p2xy =drehePunkt([p1x+the_arm.uarm.x,p1y+the_arm.uarm.y],[p1x,p1y],the_arm.oarm.r);
 			setXY(the_arm.ellenbogen,p2xy[0]-the_arm.ellenbogen.o.offsetWidth*0.5,p2xy[1]-the_arm.ellenbogen.o.offsetHeight*0.5);//g
-			
-			
-			console.log(w1,w2)
-			
+						
+			console.log(w1,w2);			
 		}
 		if(a<(b-c) || a<(c-b)){
 			w1=getWinkel([p1x,p1y+20],[p1x,p1y], [mx,my],true);
@@ -196,12 +195,12 @@ var ik=function(ziel_ID){
 	};
 	
 	var stretchen=function(the_arm,mx,my){
+		//"Hand"-Punkt
 		if(the_arm.zielhand.aktiv){
 			setXY(the_arm.zielhand,mx-the_arm.zielhand.o.offsetWidth*0.5,my-the_arm.zielhand.o.offsetHeight*0.5);
 		}
-		else{
-			
-		}	
+		
+		//"Schulter"-Punkt
 		if(the_arm.basisoarm.aktiv){
 			setXY(the_arm.basisoarm,mx-the_arm.basisoarm.o.offsetWidth*0.5,my-the_arm.basisoarm.o.offsetHeight*0.5);
 			setXY(the_arm.oarm,mx-the_arm.basisoarm.o.offsetWidth*0.5,my);
@@ -209,15 +208,17 @@ var ik=function(ziel_ID){
 		else
 			setXY(the_arm.basisoarm,the_arm.oarm.x,the_arm.oarm.y-10);
 		
+		//
 		if(the_arm.zielhand.aktiv || the_arm.basisoarm.aktiv){
 			stretchTo(the_arm,the_arm.zielhand.x+the_arm.zielhand.o.offsetWidth*0.5,the_arm.zielhand.y+the_arm.zielhand.o.offsetHeight*0.5);
 		}		
 	}
 	
 	var armaktiv=undefined;
-	var maus=function(e){
+	var mausmove=function(e){
 		var mx;
 		var my;
+		//Mausposition
 		if (e.pageX || e.pageY) { 
 		  mx = e.pageX;
 		  my = e.pageY;
@@ -235,6 +236,7 @@ var ik=function(ziel_ID){
 			p=p.parent;
 		}
 		
+		//Wann Arm aktiv
 		if(armaktiv)
 			stretchen(armaktiv,mx,my);
 		return true;	
@@ -287,7 +289,7 @@ var ik=function(ziel_ID){
 			createArm(ziel,arme[i]);
 		}
 		
-		ziel.onmousemove=maus;
+		ziel.onmousemove=mausmove;
 		ziel.onmouseup=function(){
 			for(var i=0;i<arme.length;i++){
 				arme[i].basisoarm.aktiv=false;
