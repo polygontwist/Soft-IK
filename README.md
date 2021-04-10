@@ -5,4 +5,4 @@
 
 Die rosa Punkte können per Maus verschoben werden, die "Beine" gehen automatisch mit.
 
-
+Ausprobieren: https://polygontwist.github.io/Soft-IK/softik.htm
